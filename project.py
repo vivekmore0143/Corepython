@@ -193,8 +193,7 @@ class Vip:
        reuslt=self.db1.fetchone()
        if reuslt:
           self.v=reuslt[0]
-          print("do you want to transfer money to:",reuslt[1])
-          choice=int(input("Enter 1:To procced \n 2:Exit \n:"))
+         
           amount=int(input("enter amount to transfer:"))
           if self.balance>amount+500:
             pin=input("enter pin:")
