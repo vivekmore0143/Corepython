@@ -1,0 +1,246 @@
+import mysql.connector
+import getpass
+
+class Vip:
+    def __init__(self):
+        self.db = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="sayali0143",
+        database="vip",
+        auth_plugin="mysql_native_password")
+        self.db1=self.db.cursor()
+        self.create_table()
+        self.balance=0
+        self.balance2=0
+        self.var=""
+        self.user_name=""
+        self.user1=""
+        self.user2=""
+        self.me="me"
+        self.pin=0
+
+    def user_nam(self):
+       self.db1.execute("select user_name from user_info where phone_no='{}' ".format(self.user1))
+       result=self.db1.fetchone()
+       if result:
+          self.user_name=result[0]
+        
+    def bala(self):
+       self.db1.execute("select balance from user_info where phone_no='{}' ".format(self.user1))
+       result=self.db1.fetchone()
+       if result:
+          self.balance=result[0]
+    
+    def bala2(self):
+       self.db1.execute("select balance from user_info where phone_no='{}' ".format(self.user2))
+       result=self.db1.fetchone()
+       if result:
+          self.balance2=result[0]
+       
+    def create_table(self):
+       self.db1.execute("""
+        create table if not exists user_info(
+        user_name varchar(30) unique,
+        phone_no varchar(30) unique,
+        pin varchar(30),
+        balance int default 500
+        )
+      """)
+       self.db.commit()
+    
+
+    def register(self):
+        print("----------- WELCOME ------------")
+        name=input("----- Enter User-Name ----:")
+        l=['0','1','2','3','4','5','6','7','8','9','^',',', '!', '#', '@', ':', ')','+','-']
+        for i in l:
+           if name.startswith(i):
+              print("xxx----Enter valid User_Name-(must strat with charecter)-----xxx")
+              return
+   
+        self.db1.execute(
+            '''select user_name from user_info where user_name='{}'; '''.format(name)
+        )
+        if self.db1.fetchone():
+            print("\nXXX--- This User_Name Is Already Register ---XXX")
+            return
+        try:
+           phone_no1 = int(input("------Enter your 10 Digit Phone_no------ : "))
+        except ValueError:
+           print("\nxxx---- Invalid Input. Please Enter a valid Phone_No.----xxx")
+        phone_no=str(phone_no1)
+        if len(phone_no)!=10:
+            print("\nxxx---Enter valid phone_no---xxx")
+            return
+        self.db1.execute(
+            '''select phone_no from user_info where phone_no='{}'; '''.format(phone_no)
+        )
+        if self.db1.fetchone():
+            print("\nxxx--- This Phone_No Is Already Register ---xxx")
+            return
+        try:
+           p=int(input("---- Create 4-Digit pin ----:"))
+
+         
+        except ValueError:
+           print("\nxxx---Invalid input Please Enter Pin Correctly.")
+           return
+        pin=str(p)
+        if len(pin)!=4:
+           print("\nxxx---Please Enter Valid 4 Digit Pin----xxx")
+           return
+
+        try:
+           p2=int(input("---- Conform Pin ----:"))
+         
+        except ValueError:
+           print("\nInvalid input. Please enter a valid integer.")
+           return
+        
+        pin2=str(p)
+        if len(pin)!=4:
+           print("\nxxx---Please Enter Valid 4 Digit Pin----xxx")
+           return
+
+        if p2!=p:
+            print("\nxxx---PIN DOSEN'T MATCH---XXX")
+            return
+        self.db1.execute(
+            '''insert into user_info (user_name,phone_no,pin)value('{}','{}',{}) '''.format(name,phone_no,pin2)
+        )
+        self.db.commit()
+
+        self.db1.execute(f"""
+        create table if not exists {name}(
+        widraw_amount int,
+        widraw_from varchar(30),
+        deposite_amount int,
+        deposite_to varchar(30)
+
+        )
+        # """)
+        self.db.commit()
+        print("\n------Registration Succesfull------")
+
+    def u_login(self):
+       p_no=input("---- Enter Phone_no ----:")
+       
+       self.db1.execute("select phone_no,pin from user_info where phone_no='{}' ".format(p_no))
+       reuslt=self.db1.fetchone()
+       if reuslt:
+          self.v=reuslt[0]
+          pin=input("---- Enter pin ----:")
+          if pin==reuslt[1]:
+             print("\n------------------- Welcome ------------------\n")
+             self.pin=pin
+             self.user1=p_no
+             bk.bala()
+             bk.user_nam()
+            
+             bk.user_interface()
+          else:
+             print("XXX------ invalid pin ------XXX")
+       else:
+         print("XXX------ Please Register First This Phone_No is Not REgister -----XXX ")
+
+    def user_interface(self):
+       while(True):
+          choice=int(input("\n 1:Check Balance \n 2:widraw \n 3:deposite \n 4:Money Transfer  \n 5:exit\nenter choice "))
+          if choice==1:
+             bk.c_balance()
+          elif choice==2:
+             bk.widraw()
+          elif choice==3:
+             bk.deposite()
+          elif choice==4:
+             bk.money_transfer()
+          elif choice==5:
+             break
+          else:
+             print("XXX---- Invalid Choice ----XXX")
+          
+    def c_balance(self):
+          
+        print(self.balance)
+
+    def widraw(self):
+       p=(input("------ enter pin --------"))
+       if p!=self.pin:
+          print("pin wrong")
+          return
+          
+       amount=int(input("enter amount to Widraw:"))
+       if self.balance>500:
+        self.balance-=amount
+        if self.balance>100:
+           self.db1.execute("update user_info set balance={} where phone_no='{}' ".format(self.balance,self.user1))
+           self.db.commit()
+        else:
+           self.balance+=amount
+           print("inceficient money in banck account")
+       else:
+          print("inceficient balance")
+
+    def deposite(self):
+       amount=int(input("enter amount to deposite:"))
+       self.balance=amount+self.balance
+       self.db1.execute("update user_info set balance={} where phone_no='{}' ".format(self.balance,self.user1))
+       self.db.commit()
+
+    def money_transfer(self):
+       user2=input("enter Phone_no to transfer money:")
+       self.db1.execute("select phone_no,user_name from user_info where phone_no='{}' ".format(user2))
+       reuslt=self.db1.fetchone()
+       if reuslt:
+          self.v=reuslt[0]
+          print("---- do you want to transfer money to:",reuslt[1] ,"----")
+          while(True):
+            choice=int(input("Enter 1:To Procced\n2:Exit\n:"))
+            if choice==1:    
+                amount=int(input("----Enter amount to transfer---:"))
+                if self.balance>amount+500:
+                   pin=input("enter pin:")
+                   if pin==self.pin:
+                      self.balance-=amount
+                      self.db1.execute("update user_info set balance={} where phone_no='{}' ".format(self.balance,self.user1))
+                      self.db.commit()
+                      self.user2=user2
+                      bk.bala2()
+                      self.balance2+=amount
+                      self.db1.execute("update user_info set balance={} where phone_no='{}' ".format(self.balance2,self.user2))
+                      self.db.commit()
+                      print("-------- Transaction Successfull --------")
+                      break
+                   else:
+                    print("wrong pin")
+                    break
+                else:
+                 print("inceficient balance")
+                 break
+            elif choice==2:
+               break
+            else:
+               print("invalid output")
+       else:
+          print("This Phone_no is not Register")
+
+    def home(self):
+       while(True):
+         choice=int(input("1:Register \n2:Login \n3:Exit \n Enter Choice:"))
+         if choice==1:
+          bk.register()
+         elif choice==2:
+           bk.u_login()
+         elif choice==3:
+           break
+         else:
+           print("Invalid Choice")
+    
+    
+       
+bk=Vip()
+bk.home()
+        
+
+    
