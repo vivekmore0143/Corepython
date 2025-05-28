@@ -51,6 +51,7 @@ class Vip:
     
 
     def register(self):
+        print("----------- WELCOME ------------")
         name=input("----- Enter User-Name ----:")
         l=['0','1','2','3','4','5','6','7','8','9','^',',', '!', '#', '@', ':', ')','+','-']
         for i in l:
@@ -139,9 +140,9 @@ class Vip:
             
              bk.user_interface()
           else:
-             print("invalid pin")
+             print("XXX------ invalid pin ------XXX")
        else:
-         print("Please Register First This Phone_No is Not REgister ")
+         print("XXX------ Please Register First This Phone_No is Not REgister -----XXX ")
 
     def user_interface(self):
        while(True):
@@ -157,14 +158,14 @@ class Vip:
           elif choice==5:
              break
           else:
-             print("Invalid Choice")
+             print("XXX---- Invalid Choice ----XXX")
           
     def c_balance(self):
           
         print(self.balance)
 
     def widraw(self):
-       p=(input("enter pin"))
+       p=(input("------ enter pin --------"))
        if p!=self.pin:
           print("pin wrong",self.pin)
           return
@@ -193,23 +194,34 @@ class Vip:
        reuslt=self.db1.fetchone()
        if reuslt:
           self.v=reuslt[0]
-         
-          amount=int(input("enter amount to transfer:"))
-          if self.balance>amount+500:
-            pin=input("enter pin:")
-            if pin==self.pin:
-               self.balance-=amount
-               self.db1.execute("update user_info set balance={} where phone_no='{}' ".format(self.balance,self.user1))
-               self.db.commit()
-               self.user2=user2
-               bk.bala2()
-               self.balance2+=amount
-               self.db1.execute("update user_info set balance={} where phone_no='{}' ".format(self.balance2,self.user2))
-               self.db.commit()
+          print("---- do you want to transfer money to:",reuslt[1] ,"----")
+          while(True):
+            choice=int(input("Enter 1:To Procced\n2:Exit\n:"))
+            if choice==1:    
+                amount=int(input("----Enter amount to transfer---:"))
+                if self.balance>amount+500:
+                   pin=input("enter pin:")
+                   if pin==self.pin:
+                      self.balance-=amount
+                      self.db1.execute("update user_info set balance={} where phone_no='{}' ".format(self.balance,self.user1))
+                      self.db.commit()
+                      self.user2=user2
+                      bk.bala2()
+                      self.balance2+=amount
+                      self.db1.execute("update user_info set balance={} where phone_no='{}' ".format(self.balance2,self.user2))
+                      self.db.commit()
+                      print("-------- Transaction Successfull --------")
+                      break
+                   else:
+                    print("wrong pin")
+                    break
+                else:
+                 print("inceficient balance")
+                 break
+            elif choice==2:
+               break
             else:
-             print("wrong pin")
-          else:
-             print("inceficient balance")
+               print("invalid output")
        else:
           print("This Phone_no is not Register")
 
